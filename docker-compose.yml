@@ -1,0 +1,30 @@
+services:
+  # postgres
+  postgres:
+    image: postgres
+    hostname: postgres
+    restart: always
+    ports:
+      - "5431:5431"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    command: -p 5431
+
+  # migrate
+  migrate:
+    image: migrate/migrate
+    restart: on-failure
+    depends_on:
+      - postgres
+    command: [ "-path", "/migration", "-database", "postgres://postgres:postgres@postgres:5431/postgres?sslmode=disable", "up" ]
+    volumes:
+      - ./migration:/migration
+
+ # tron
+  #tron:
+   # build: .
+    #restart: always
+    #depends_on:
+     #- migrate
