@@ -1,30 +1,29 @@
 services:
-  # postgres
   postgres:
     image: postgres
+    container_name: postgres
     hostname: postgres
-    restart: always
     ports:
-      - "5431:5431"
+      - "5432:5432"
     environment:
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-    command: -p 5431
 
-  # migrate
   migrate:
     image: migrate/migrate
-    restart: on-failure
+    container_name: migrate
     depends_on:
       - postgres
-    command: [ "-path", "/migration", "-database", "postgres://postgres:postgres@postgres:5431/postgres?sslmode=disable", "up" ]
+    command: [ "-path", "/migration", "-database", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "up" ]
     volumes:
       - ./migration:/migration
 
- # tron
-  #tron:
-   # build: .
-    #restart: always
-    #depends_on:
-     #- migrate
+  obfs-detector:
+   build: .
+   container_name: obfs-detector
+   depends_on:
+     - postgres
+     - migrate
